@@ -1,4 +1,4 @@
-from bottle import template
+from bottle import template, redirect
 from app.controllers.db.datarecord import DataRecord
 
 class Application():
@@ -23,10 +23,12 @@ class Application():
     
     def app(self, parameter=None):
         if not parameter:
-            return template('app/views/html/page_app')
+            return template('app/views/html/page_app',  transfered = None, data = None)
         else: 
+            print(parameter)
             info = self.models.work_with_parameter(parameter)
             if not info:
+                print("Não passou")
                 redirect('/app')
             else:
                 return template('app/views/html/page_app', transfered = True, data = info)
