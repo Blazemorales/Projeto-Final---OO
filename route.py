@@ -30,17 +30,17 @@ def activate_page(username=None):
         return ctl.render('app', username)
 
 #-----------------------------------------------------------------------------
-@app.route('/portal', method='GET')
+@app.route('/portal', methods='GET')
 def login():
     return ctl.render('portal')
 
-@app.route('/portal', method='POST')
+@app.route('/portal', methods='POST')
 def action_portal():
     username = request.forms.get('username')
     password = request.forms.get('password')
     session_id, username = ctl.authenticate_user(username, password)
     if session_id:
-        response.set_cookie('session_id', session_id, httplonly = True, secure=True, max_age=3600)
+        response.set_cookie('session_id', session_id, httponly = True, secure=True, max_age=3600)
 if __name__ == '__main__':
 
     run(app, host='0.0.0.0', port=8080, debug=True)
