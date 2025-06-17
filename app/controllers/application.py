@@ -1,14 +1,16 @@
-from bottle import template, redirect
+from bottle import template, redirect, request
 from app.controllers.db.datarecord import DataRecord
 
 class Application():
 
     def __init__(self):
         self.pages = {
-            "app": self.app
+            "app": self.app,
+            "portal": self.portal
         }
 
-        self.models = DataRecord()
+        self.__models = DataRecord()
+        self.__current_login = None
 
     def render(self,page, parameter=None):
        content = self.pages.get(page, self.helper)
@@ -16,19 +18,39 @@ class Application():
            return content()
        else:
            return content(parameter)
-
-
+    
+    def get_session_id(self):
+        return request.get_cookie('session_id')
+    
     def helper(self):
         return template('app/views/html/helper')
     
-    def app(self, parameter=None):
-        if not parameter:
-            return template('app/views/html/page_app',  transfered = None, data = None)
+    def portal(self):
+        return template('app/views/html/portal')
+    
+    def app(self, username=None):
+        if self.is_authenticated(username):
+            session_id = self.get_session_id()
+            user = self.__models.getCurrentUser(session_id)
+            return template('app/views/html/page_app',  current_user=user)
         else: 
-            print(parameter)
-            info = self.models.work_with_parameter(parameter)
-            if not info:
-                print("Não passou")
-                redirect('/app')
-            else:
-                return template('app/views/html/page_app', transfered = True, data = info)
+            return template('app/views/html/page_app', current_user=None)
+    
+    def is_autheticated(self, username):
+        session_id = self.get_session_id()
+        current_username = self.__models.getUserName(session_id)
+        return username == current_username
+    
+    def authenticated_user(self, username, password):
+        session_id = self.__models.checkUSer(username, password)
+        if session_id:
+            self.logout_user()
+            self.__current_username = self.__models.getUserName(session_id)
+            return session_id, username
+        return None
+    
+    def logout_user(self):
+        self.__current_username = None
+        session_id = self.get_session_id()
+        if session_id:
+            self.__models.logout(session_id)
