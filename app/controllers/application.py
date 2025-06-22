@@ -35,7 +35,7 @@ class Application:
         self.wsgi_app = socketio.WSGIApp(self.sio, self.app)
 
 
-    # estabelecimento das rotas
+        # estabelecimento das rotas
     def setup_routes(self):
         @self.app.route('/static/<filepath:path>')
         def serve_static(filepath):
@@ -62,11 +62,20 @@ class Application:
         def edit_getter():
             return self.render('edit')
 
-        @self.app.route('/portal', method='POST')
-        def portal_action():
+        @self.app.route('/portal', methods='GET')
+        def login():
+            return self.render('portal')
+
+        @self.app.route('/portal', methods='POST')
+        def action_portal():
             username = request.forms.get('username')
             password = request.forms.get('password')
-            self.authenticate_user(username, password)
+            session_id, username = self.authenticated_user(username, password)
+            if session_id:
+                response.set_cookie('session_id', session_id, httponly = True, secure=True, max_age=3600)
+                redirect(f'/pagina/{username}')
+            else:
+                return redirect('/portal')
 
         @self.app.route('/edit', method='POST')
         def edit_action():
@@ -101,10 +110,13 @@ class Application:
             self.delete_user()
             return self.render('portal')
         
-        @self.app.route('/app')
-        @self.app.route('/app/<username>')
-        def app_getter(username=None):
-            return self.render('app', username)
+        @self.app.route('/app', methods=['GET'])
+        @self.app.route('/app/<username>', methods=['GET'])
+        def activate_page(username=None):
+            if not username:
+                return self.render('app')
+            else:
+                return self.render('app', username)
 
 
     # método controlador de acesso às páginas:
