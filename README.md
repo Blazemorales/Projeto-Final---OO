@@ -1,6 +1,6 @@
-# Bmvc
+# Projeto Final --- OO, by Rodrigo and João 
 
-## Trabalhando com o BMVC no BASH:
+## Stok Made in FGA:
 
 1. Executar o arquivo 'route.py', na raiz do projeto.
 
