@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal STOK</title>
+    <link href=".../static/">
+    <script></script>
 </head>
+
 <body>
     <div class="centralizar">
-    <h1>Olá! Seja bem-vindo ao Login</h1>
+        <h1>Olá! Seja bem-vindo à STOK - MADE in FGA</h1>        
+    </div>
+
+    <!--Para Loja-->
+    <div class="centralizar">
+    <h1>Lojas</h1>
         <form action="/portal" method="post">
             <h2>Login</h2>
             <label for="username">Seu usuário</label>
@@ -18,9 +26,29 @@
             
             <input value="Login" type="submit" />
         </form>
-        </div>
+    </div>
+    <!---->
+
+    <!--Para produtos-->
+    <div class="centralizar">
+    <h1>Produtos</h1>
+        <form method="post">
+            <h2>Cadastro de Produtos</h2>
+            <label for="username"></label>
+            <input id="username" name="username" type="text" required /><br>
+            
+            <label for="password"></label>
+            <input id="username" name="username" type="text" required /><br>
+            
+            <input value="Login" type="submit" />
+        </form>
+    </div>
+    <!---->
+
+    <!--Logout-->
         <form action="/logout" method="post">
             <button type="submit">Logout</button>
         </form>
+    <!---->
 </body>
 </html>
