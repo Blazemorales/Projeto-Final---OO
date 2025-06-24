@@ -1,107 +1,156 @@
-/* portal.css */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
 
-/* Reset básico para remover estilos padrão */
-body, h1, h4, p, img {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: "Oswald", sans-serif;
 }
 
 /* Estilo para o corpo da página */
 body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    background-color: #f4f4f4;
-    color: #333;
-    padding: 20px;
     display: flex;
-    flex-direction: column; /* Adiciona esta linha para alinhar os itens em coluna */
-    justify-content: flex-start; /* Alinha o conteúdo no início, em vez de no centro */
+    justify-content: center;
     align-items: center;
     min-height: 100vh;
-    margin: 0;
+    /* Keeping background image here if it's meant as a full-page background */
+    background: url('../img/stok_gpt.png');
+    background-size: cover;
+    background-position: center;
+    /* You might want to remove the image from the HTML body if it's only a background */
+}
+
+/* Visually hide content but keep it accessible for screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Styling for the logo image if it's a content image in the body */
+.main-logo {
+    /* Example: position it or hide it if it's just a background duplicate */
+    display: none; /* Hide if body background handles it */
+    /* Or style it if it's a prominent logo on the page, e.g.: */
+    /* position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 100px; */
+}
+
+
+.caixinha {
+    /* Added responsiveness */
+    width: 90%; /* Occupy 90% of parent width */
+    max-width: 420px; /* But not more than 420px */
+    background-color: transparent;
+    border: 8px solid rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    color: #fff;
+    padding: 30px 40px;
+    /* Added some margin top to give space from the top for small screens if logo is visible */
+    margin-top: 20px;
 }
 
 /* Estilo para o título */
-h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
+.caixinha h1 {
+    text-align: center;
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 30px;
     color: #333;
 }
 
-/* Estilo para o subtítulo */
-h4 {
-    font-size: 1.2em;
+.caixinha p{
+    font-size: 36px;
+    text-align: center;
     margin-bottom: 30px;
-    color: #777;
+    color: #c2c1c1;
 }
 
-/* Estilo para a imagem */
-img {
-    border-radius: 50%;
+.entrar{
+    /* Corrected invalid 'position: center;' to proper horizontal centering */
+    margin: 30px auto; /* Centers the div horizontally */
+    width: 100%;
+    height: 50px;
+}
+
+.entrar input{
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    border: 2px solid rgba(255, 255, 255, .5); /* Gave a slightly visible initial border */
+    border-radius: 40px;
+    outline: none;
+    font-size: 16px;
+    color: #fff;
+    padding: 20px 45px 20px 20px;
+}
+
+.entrar input::placeholder{
+    color: #fff;
+}
+
+/* Applied button styling directly to the .button class */
+.button {
+    width: 100%;
+    height: 50px;
+    background-color: #fff;
+    border: 2px solid transparent; /* Start with a transparent border */
     cursor: pointer;
-    transition: transform 0.3s ease;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    display: block;
+    margin: 30px auto; /* Centers button and adds margin */
+    border-radius: 40px; /* Consistent border radius with inputs */
+    transition: 0.2s ease; /* Smooth transition for hover effects */
 }
 
-img:hover {
-    transform: scale(1.1);
+/* Removed .login_hover class from HTML, now use :hover directly */
+.button:hover {
+    background-color: transparent;
+    border: 2px solid #acabab;
+    color: #fff;
 }
 
-/* Centralizar o conteúdo dentro do container */
-.object_centered {
+/* Specific styling for the logout button if present */
+.logout-button {
+    background-color: rgba(255, 255, 255, .1); /* Slightly different initial look */
+    color: #fff;
+    margin-top: 10px; /* Adjust spacing as needed */
+}
+
+.logout-button:hover {
+    background-color: #fff;
+    border: 2px solid #fff;
+    color: #333;
+}
+
+
+.cadastro{
+    font-size: 14px;
     text-align: center;
-    background: #fff;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px; /* Adiciona espaçamento entre os blocos */
-    width: 100%; /* Garante que o bloco ocupe a largura total disponível */
-    max-width: 600px; /* Define uma largura máxima para limitar o tamanho */
+    margin: 20px 0 15px;
 }
 
-.justify-text {
-    text-align: justify;
+.cadastro p{
+    text-decoration: none; /* Redundant for p tags but harmless */
+    color: #fff;
 }
 
-.code-block {
-     background-color: #f5f5f5;
-     border: 1px solid #ddd;
-     border-radius: 5px;
-     padding: 10px;
-     font-family: monospace;
-     overflow-x: auto;
-     text-align: justify;
+.cadastro a{
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
 }
 
-/* application.css */
-
-.animated-message {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    font-size: 1.2em;
-    border-radius: 5px;
-    z-index: 1000;
-    animation: fadeInOut 2s ease-out;
-}
-
-@keyframes fadeInOut {
-    0% { opacity: 0; }
-    50% { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-.button-container {
-    display: flex; /* Define o contêiner como flexível */
-    gap: 10px; /* Espaçamento entre os botões */
-}
-
-.button-container-portal {
-    text-align: center;
-    display: flex; /* Define o contêiner como flexível */
-    gap: 10px; /* Espaçamento entre os botões */
+.cadastro a:hover{
+    text-decoration: underline;
 }

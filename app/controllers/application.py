@@ -14,8 +14,9 @@ class Application:
             'delete': self.delete,
             'chat': self.chat,
             'edit': self.edit,
-            'app': self.app
+            'app': self._app
         }
+
         self.__users = UserRecord()
         self.__messages = MessageRecord()
         self.__current_login = None
@@ -44,8 +45,9 @@ class Application:
         @self.app.route('/favicon.ico')
         def favicon():
             return static_file('favicon.ico', root='.app/static')
-
-        @self.app.route('/pagina', method='GET')
+        
+        #ao inicializar o app, redirecionamos o usuário à página principal
+        @self.app.route('/', method='GET')
         def pagina_getter():
             return self.render('pagina')
 
@@ -58,26 +60,28 @@ class Application:
         def edit_getter():
             return self.render('edit')
 
-        @self.app.route('/portal', methods='GET')
+        @self.app.route('/portal', method='GET')
         def portal_getter():
-            return self.render('app')
-        
-        @self.app.route('/portal', methods=['POST'])
+            return template('app/views/html/page_app')
+
+        @self.app.route('/portal', method='POST')
         def portal_action():
             username = request.forms.get('username')
             password = request.forms.get('password')
             session_id = self.__users.checkUser(username, password)
-
+            print(f"{username}, {password}")
             if session_id:
                 self.logout_user()
                 response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
                 redirect(f'/main/{username}')
             else:
-                # Passe tudo que o template possa precisar
-                return template('app/views/html/page_app', error="Usuário ou senha inválidos", username=username, removed=None, created=None, edited=None)
+                return template('app/views/html/page_app', 
+                        error="Usuário ou senha inválidos", 
+                        username=username, 
+                        removed=None, 
+                        created=None, 
+                        edited=None)
 
-
-            
         @self.app.route('/edit', method='POST')
         def edit_action():
             username = request.forms.get('username')
@@ -122,7 +126,7 @@ class Application:
 
     # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
-        content = self.pages.get(page, self.portal)
+        content = self.pages.get(page, self.app)
         if not parameter:
             return content()
         return content(parameter)
@@ -168,7 +172,7 @@ class Application:
                 print("Não passou")
                 redirect('/app')
             else:
-                return template('app/views/html/page_app', transfered = True, data = info)
+                return template('app/views/html/main', transfered = True, data = info)
 
 
     def get_session_id(self):
@@ -228,7 +232,7 @@ class Application:
             print(f"Encoding error: {e}")
             return "An error occurred while processing the message."
         
-    def app(self, parameter=None):
+    def _app(self, parameter=None):
         if not parameter:
             return template('app/views/html/page_app', transfered=None, data=None)
         else:

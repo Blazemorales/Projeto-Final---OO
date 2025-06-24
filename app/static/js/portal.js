@@ -1,29 +1,20 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const image = document.querySelector("img");
+    const img_button = document.querySelector("img");
 
-    if (image) {
-        image.addEventListener("click", function() {
-            document.body.style.backgroundColor = getRandomColor();
-
-            showAnimatedagina/MouraMessage("Você clicou na imagem!");
+    if (img_button) {
+        img_button.addEventListener("click", function() {
+            showAnimatedMessage("Redirecionando para login...");
         });
     }
 
-    function getRandomColor() {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    }
-
     function showAnimatedMessage(message) {
+        //Mostra a mensagem
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('animated-message');
         messageDiv.innerText = message;
         document.body.appendChild(messageDiv);
 
+        //Timer da mensagem
         setTimeout(() => {
             document.body.removeChild(messageDiv);
         }, 2000);
