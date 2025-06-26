@@ -3,52 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal STOK</title>
-    <link href=".../static/">
-    <script></script>
+    <title>Pagina principal - STOK</title>
+    <link rel="stylesheet" type="text/css" href="/app/static/css/main.css">
 </head>
 
 <body>
-    <div class="centralizar">
-        <h1>Olá! Seja bem-vindo à STOK - MADE in FGA</h1>        
-    </div>
+    <header class="cabeçalho">
+        <nav class="opcao-cabeçalho">
+            <a class="opcao-cabeçalho-item">Home</a>
+            <a class="opcao-cabeçalho-item">Lojas</a>
+            <a class="opcao-cabeçalho-item">Produtos</a>
+        </nav>
+    </header>
 
-    <!--Para Loja-->
-    <div class="centralizar">
-    <h1>Lojas</h1>
-        <form action="/portal" method="post">
-            <h2>Login</h2>
-            <label for="username">Seu usuário</label>
-            <input id="username" name="username" type="text" required /><br>
-            
-            <label for="password">Sua senha:</label>
-            <input id="username" name="username" type="text" required /><br>
-            
-            <input value="Login" type="submit" />
-        </form>
-    </div>
-    <!---->
+    <main>
+        <section class="corpo">
+            <div>
+                <h1 class="text-corpo">Project Stok</h1>
+                <h2 class="text-corpo">Este é o Project Stok. Seja bem-vindo! Aproveite para conhecer as lojas e produtos cadastrados</h2>
+                <div class="botao">
+                <button class="botao-corpo">Ver lojas</button>
+                <button class="botao-corpo">Ver Produtos</button>
+                </div>
+            </div>
+        </section>
 
-    <!--Para produtos-->
-    <div class="centralizar">
-    <h1>Produtos</h1>
-        <form method="post">
-            <h2>Cadastro de Produtos</h2>
-            <label for="username"></label>
-            <input id="username" name="username" type="text" required /><br>
-            
-            <label for="password"></label>
-            <input id="username" name="username" type="text" required /><br>
-            
-            <input value="Login" type="submit" />
-        </form>
-    </div>
-    <!---->
+        <section class="corpo1">
+            <div>
+                <h3 class="text-corpo1">O que é o <strong>Project Stok</strong>?</h3>
+                <p class="text-corpo2">Esse é um <strong> protótipo de um site de gerenciamento de estoque </strong> desenvolvido por alunos de OO.</p>
+                <p class="text-corpo2">Essa plataforma foi feita com o intenção de:</p>
+                <p class="text-corpo2">1. O usuário possa ver as lojas cadastradas</p>
+                <p class="text-corpo2">2. O usuário possa ver os produtos cadastrados</p>
+            </div>
+        </section>
+    </main>
 
-    <!--Logout-->
+    <footer class="fim">
         <form action="/logout" method="post">
-            <button type="submit">Logout</button>
+            <button class="fim-botao" type="submit">Logout</button>
         </form>
-    <!---->
+    </footer>
 </body>
 </html>

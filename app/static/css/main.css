@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Oswald", sans-serif;
+    text-decoration: none;
+}
+
+/* Estilo para o corpo da página */
+body {
+    font-size: 100%;
+    background: linear-gradient(68.15deg, #2F2322 16.62%, #784cf0 85.61%);
+    cursor: pointer;
+}
+
+.cabeçalho {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    padding: 24px;
+}
+
+.opcao-cabeçalho{
+    display: flex;
+    gap: 32px;
+    
+}
+
+.opcao-cabeçalho-item{
+    color: #FFF2EF;
+    font-weight: 400;
+    font-size: 18px;
+}
+
+.corpo{
+    border-top:0.4px solid #FFF2EF;
+    padding: 32px;
+}
+
+.text-corpo{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    color: #FFF2EF;
+}
+
+/* Adicione estas classes ao seu CSS */
+
+.botao{
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+    gap: 32px; 
+    margin-top: 20px; 
+}
+
+.botao-corpo {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 15px 30px; 
+    background-color: #ECD6C4;
+    width: auto; 
+    min-width: 150px; 
+    height: 60px;
+    border: none;
+    box-shadow: 4px 5px 4px rgba(0,0,0,0.25);
+    border-radius: 20px;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: 300;
+    font-size: 24px;
+    color: #2F2322;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease; 
+    margin-top: 20px;
+}
+
+.botao-corpo:hover {
+    transform: translateY(-2px); 
+    box-shadow: 6px 7px 6px rgba(0,0,0,0.25);
+}
+
+.corpo1{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    margin-top: 20px;
+    justify-content: center;
+    text-align: center;
+}
+
+.text-corpo1{
+    border-top: 0.4px solid #FFF2EF;
+    padding-top: 48px;
+    font-weight: 400;
+    font-size: 24px;
+    color:#FFF2EF;
+    margin-bottom: 16px;
+}
+
+.text-corpo2{
+    margin-bottom: 10px;
+    color:#ECD6C4;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+.fim{
+    padding: 32px;
+    border-top: 0.4px solid #FFF2EF;
+    margin-top: 48px;
+}
+
+.fim-botao{
+    display: block;
+    margin: 0 auto;
+    justify-content: space-around;
+    padding: 15px 30px; 
+    background-color: #ECD6C4;
+    width: auto; 
+    min-width: 150px; 
+    height: 60px;
+    border: none;
+    box-shadow: 4px 5px 4px rgba(0,0,0,0.25);
+    border-radius: 20px;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: 300;
+    font-size: 24px;
+    color: #2F2322;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+}

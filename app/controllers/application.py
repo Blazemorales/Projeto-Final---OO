@@ -73,7 +73,7 @@ class Application:
             if session_id:
                 self.logout_user()
                 response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
-                redirect(f'/main/{username}')
+                redirect('/main')
             else:
                 return template('app/views/html/page_app', 
                         error="Usuário ou senha inválidos", 
@@ -81,6 +81,14 @@ class Application:
                         removed=None, 
                         created=None, 
                         edited=None)
+
+        @self.app.route('/main', method='GET')
+        def main_page():
+            current_user = self.getCurrentUserBySessionId()
+            if current_user:
+                return template('app/views/html/main', transfered=True, data=current_user)
+            else:
+                redirect('/portal')  # Redireciona se não estiver logado
 
         @self.app.route('/edit', method='POST')
         def edit_action():
@@ -104,7 +112,7 @@ class Application:
         @self.app.route('/logout', method='POST')
         def logout_action():
             self.logout_user()
-            return self.render('app')
+            return self.render('portal')
 
         @self.app.route('/delete', method='GET')
         def delete_getter():
