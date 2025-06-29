@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Criar Usuário - STOK</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style>
+        .form-container { max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9; }
+        .form-container label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .form-container input, .form-container select, .form-container button { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; }
+        .form-container button { background-color: #2ecc71; color: white; cursor: pointer; font-size: 16px; }
+        .pending-list table { width: 100%; border-collapse: collapse; }
+        .pending-list th, .pending-list td { border: 1px solid #ddd; padding: 8px; }
+        .approve-btn { background-color: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        
+        <h2>Solicitações de Acesso Pendentes</h2>
+        % if not pending_users:
+            <p>Nenhuma solicitação pendente no momento.</p>
+        % else:
+            <div class="pending-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Usuário Solicitado</th>
+                            <th>Aprovar como</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        % for req in pending_users:
+                        <tr>
+                            <td>{{req['username']}}</td>
+                            <td>
+                                <form action="/admin/users/approve" method="post">
+                                    <input type="hidden" name="username" value="{{req['username']}}">
+                                    <input type="hidden" name="password" value="{{req['password']}}">
+                                    
+                                    <select name="user_type">
+                                        <option value="comum">Comum</option>
+                                        <option value="adm">Administrador</option>
+                                    </select>
+                            </td>
+                            <td>
+                                    <button type="submit" class="approve-btn">Aprovar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        % end
+                    </tbody>
+                </table>
+            </div>
+        % end
+
+        <hr style="margin: 40px 0;">
+
+        <h2>Criar Novo Usuário Manualmente</h2>
+        <form action="/admin/users/create" method="post">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div>
+                <label for="user_type">Tipo de Usuário:</label>
+                <select id="user_type" name="user_type">
+                    <option value="comum">Comum</option>
+                    <option value="adm">Administrador</option>
+                </select>
+            </div>
+            <button type="submit">Criar Usuário Manualmente</button>
+        </form>
+        <br>
+        <a href="/admin/users">Voltar para o Painel</a>
+    </div>
+</body>
+</html>

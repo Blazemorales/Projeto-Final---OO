@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "nome": "Caneta Azul",
+    "descricao": "Caneta esferográfica azul, ponta fina",
+    "preco": 2.5,
+    "estoque": 100
+  },
+  {
+    "id": 2,
+    "nome": "Caderno 100 folhas",
+    "descricao": "Caderno espiral com 100 folhas pautadas",
+    "preco": 12.9,
+    "estoque": 50
+  }
+]

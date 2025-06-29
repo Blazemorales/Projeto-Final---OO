@@ -1,12 +1,11 @@
-from app.controllers.datarecord import UserRecord, MessageRecord
+from app.controllers.datarecord import UserRecord, MessageRecord, DataRecord
 from bottle import template, redirect, request, response, Bottle, static_file
 import socketio
+import json
 
-#a
 class Application:
 
     def __init__(self):
-
         self.pages = {
             'portal': self.portal,
             'pagina': self.pagina,
@@ -16,27 +15,19 @@ class Application:
             'edit': self.edit,
             'app': self._app
         }
-
         self.__users = UserRecord()
         self.__messages = MessageRecord()
         self.__current_login = None
         self.edited = None
         self.removed = None
         self.created= None
-
-        # Initialize Bottle app
+        self.__produtos = DataRecord()
         self.app = Bottle()
         self.setup_routes()
-
-        # Initialize Socket.IO server
         self.sio = socketio.Server(async_mode='eventlet')
         self.setup_websocket_events()
-
-        # Create WSGI app
         self.wsgi_app = socketio.WSGIApp(self.sio, self.app)
 
-
-        # estabelecimento das rotas
     def setup_routes(self):
         @self.app.route('/static/<filepath:path>')
         def serve_static(filepath):
@@ -46,7 +37,6 @@ class Application:
         def favicon():
             return static_file('favicon.ico', root='.app/static')
         
-        #ao inicializar o app, redirecionamos o usuário à página principal
         @self.app.route('/', method='GET')
         def pagina_getter():
             return self.render('pagina')
@@ -54,11 +44,6 @@ class Application:
         @self.app.route('/chat', method='GET')
         def chat_getter():
             return self.render('chat')
-
-
-        @self.app.route('/edit', method='GET')
-        def edit_getter():
-            return self.render('edit')
 
         @self.app.route('/portal', method='GET')
         def portal_getter():
@@ -72,11 +57,13 @@ class Application:
             print(f"{username}, {password}")
             if session_id:
                 self.logout_user()
-                response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
+                response.set_cookie('session_id', session_id, httponly=True, secure=False, max_age=3600)
+                print(f"cookie {session_id}")
                 redirect('/main')
             else:
+                print("deu erro")
                 return template('app/views/html/page_app', 
-                        error="Usuário ou senha inválidos", 
+                        error="Usuário ou senha inválidos",
                         username=username, 
                         removed=None, 
                         created=None, 
@@ -86,43 +73,22 @@ class Application:
         def main_page():
             current_user = self.getCurrentUserBySessionId()
             if current_user:
-                return template('app/views/html/main', transfered=True, data=current_user)
+                tipo = getattr(current_user, 'tipo', 'comum')
+                produtos_json = json.dumps(self.__produtos.getAllProducts())
+                lojas_json = json.dumps(self.__produtos.getAllStores())
+                return template('app/views/html/main.html',
+                                user_type_raw=tipo,
+                                user_type_json=json.dumps(tipo),
+                                itens=produtos_json,
+                                lojas=lojas_json)
             else:
-                redirect('/portal')  # Redireciona se não estiver logado
+                redirect('/portal')
 
-        @self.app.route('/edit', method='POST')
-        def edit_action():
-            username = request.forms.get('username')
-            password = request.forms.get('password')
-            print(username + ' sendo atualizado...')
-            self.update_user(username, password)
-            return self.render('edit')
-
-        @self.app.route('/create', method='GET')
-        def create_getter():
-            return self.render('create')
-#session_id
-        @self.app.route('/create', method='POST')
-        def create_action():
-            username = request.forms.get('username')
-            password = request.forms.get('password')
-            self.insert_user(username, password)
-            return self.render('app')
-#__users
         @self.app.route('/logout', method='POST')
         def logout_action():
             self.logout_user()
             return self.render('portal')
 
-        @self.app.route('/delete', method='GET')
-        def delete_getter():
-            return self.render('delete')
-
-        @self.app.route('/delete', method='POST')
-        def delete_action():
-            self.delete_user()
-            return self.render('app')
-        
         @self.app.route('/app', methods=['GET'])
         @self.app.route('/app/<username>', methods=['GET'])
         def activate_page(username=None):
@@ -130,7 +96,66 @@ class Application:
                 return self.render('app')
             else:
                 return self.render('app', username)
+            
+        @self.app.route('/solicitar-acesso', method='GET')
+        def request_access_form():
+            return template('app/views/html/solicitar_acesso.html', success_message=None)
 
+        @self.app.route('/solicitar-acesso', method='POST')
+        def request_access_action():
+            username = request.forms.get('username')
+            password = request.forms.get('password')
+            self.__users.request_access(username, password)
+            return template('app/views/html/solicitar_acesso.html', success_message="Sua solicitação foi enviada com sucesso!")
+
+        @self.app.route('/admin/users', method='GET')
+        def admin_users_panel():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1><p>Você não tem permissão para acessar esta página.</p>"
+            all_users = self.__users.getUserAccounts()
+            return template('app/views/html/admin_users.html', users=all_users, current_admin=current_user)
+
+        @self.app.route('/admin/users/create', method='GET')
+        def create_user_form():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+            pending_users = self.__users.get_pending_requests()
+            return template('app/views/html/create_user.html', pending_users=pending_users)
+
+        @self.app.route('/admin/users/create', method='POST')
+        def create_user_action():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+            username = request.forms.get('username')
+            password = request.forms.get('password')
+            user_type = request.forms.get('user_type')
+            self.__users.book(username, password, user_type) 
+            redirect('/admin/users')
+
+        @self.app.route('/admin/users/approve', method='POST')
+        def approve_user_action():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+            username = request.forms.get('username')
+            password = request.forms.get('password')
+            user_type = request.forms.get('user_type')
+            self.__users.book(username, password, user_type)
+            self.__users.remove_pending_request(username)
+            redirect('/admin/users/create')
+
+        @self.app.route('/admin/users/delete/<username_to_delete>', method='POST')
+        def delete_user_action(username_to_delete):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+            if current_user.username == username_to_delete:
+                return "<h1>Ação Inválida</h1><p>Você não pode excluir a si mesmo.</p>"
+            self.__users.removeUser(username_to_delete)
+            redirect('/admin/users')
 
     # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
