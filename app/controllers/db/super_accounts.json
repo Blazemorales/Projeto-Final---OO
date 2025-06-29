@@ -1,1 +1,1 @@
-[{"username": "Mourison", "password": "123456", "permissions": "['user','message']"}]
+[{"username": "Mourison", "password": "123456", "tipo": "adm", "permissions": ["user", "message"]}]

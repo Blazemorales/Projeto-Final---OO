@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitar Acesso - STOK</title>
+    <link rel="stylesheet" href="/static/css/main.css"> <style>
+        .form-container { max-width: 500px; margin: 50px auto; padding: 30px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9; text-align: center; }
+        .form-container label { display: block; margin-bottom: 8px; font-weight: bold; text-align: left;}
+        .form-container input { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; }
+        .form-container button { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .success-message { color: #2ecc71; font-weight: bold; margin-top: 20px;}
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Solicitar Acesso ao Sistema</h2>
+        <p>Preencha os dados abaixo. Seu pedido será analisado por um administrador.</p>
+        <br>
+        <form action="/solicitar-acesso" method="post">
+            <div>
+                <label for="username">Usuário desejado:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">Senha desejada:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Enviar Solicitação</button>
+        </form>
+
+        % if success_message:
+            <p class="success-message">{{success_message}}</p>
+        % end
+
+        <br>
+        <a href="/portal">Voltar para o Login</a>
+    </div>
+</body>
+</html>

@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagina principal - STOK</title>
-    <link rel="stylesheet" type="text/css" href="/app/static/css/main.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Página Principal - STOK</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
 </head>
-
 <body>
     <header class="cabeçalho">
         <nav class="opcao-cabeçalho">
-            <a class="opcao-cabeçalho-item">Home</a>
-            <a class="opcao-cabeçalho-item">Lojas</a>
-            <a class="opcao-cabeçalho-item">Produtos</a>
+            
+            <button class="opcao-cabeçalho-item" id="btn-lojas">Lojas</button>
+            <button class="opcao-cabeçalho-item" id="btn-produtos">Produtos</button>
+
+            % if user_type_raw == 'adm':
+                <a href="/admin/users" class="opcao-cabeçalho-item" style="color: #ffb300; font-weight: bold;">Gerenciar Usuários</a>
+            % end
+
         </nav>
     </header>
 
@@ -20,10 +24,12 @@
         <section class="corpo">
             <div>
                 <h1 class="text-corpo">Project Stok</h1>
-                <h2 class="text-corpo">Este é o Project Stok. Seja bem-vindo! Aproveite para conhecer as lojas e produtos cadastrados</h2>
+                <h2 class="text-corpo">
+                    Este é o Project Stok. Seja bem-vindo! Aproveite para conhecer as lojas e produtos cadastrados.
+                </h2>
                 <div class="botao">
-                <button class="botao-corpo">Ver lojas</button>
-                <button class="botao-corpo">Ver Produtos</button>
+                    <button class="botao-corpo" id="btn-lojas-mobile">Ver lojas</button>
+                    <button class="botao-corpo" id="btn-produtos-mobile">Ver Produtos</button>
                 </div>
             </div>
         </section>
@@ -31,12 +37,16 @@
         <section class="corpo1">
             <div>
                 <h3 class="text-corpo1">O que é o <strong>Project Stok</strong>?</h3>
-                <p class="text-corpo2">Esse é um <strong> protótipo de um site de gerenciamento de estoque </strong> desenvolvido por alunos de OO.</p>
-                <p class="text-corpo2">Essa plataforma foi feita com o intenção de:</p>
+                <p class="text-corpo2">
+                    Esse é um <strong>protótipo de um site de gerenciamento de estoque</strong> desenvolvido por alunos de OO.
+                </p>
+                <p class="text-corpo2">Essa plataforma foi feita com a intenção de:</p>
                 <p class="text-corpo2">1. O usuário possa ver as lojas cadastradas</p>
                 <p class="text-corpo2">2. O usuário possa ver os produtos cadastrados</p>
             </div>
         </section>
+
+        <div id="lista-container"></div>
     </main>
 
     <footer class="fim">
@@ -44,5 +54,14 @@
             <button class="fim-botao" type="submit">Logout</button>
         </form>
     </footer>
+
+    <script>
+        /* global lojas, itens, userType */
+        const userType = {{!user_type_json}}; /* <<< CORRIGIDO AQUI */
+        const itens = {{!itens}};
+        const lojas = {{!lojas}};
+    </script>
+    <script src="/static/js/main.js" defer></script>
+
 </body>
 </html>

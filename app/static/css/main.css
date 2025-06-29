@@ -11,8 +11,12 @@
 /* Estilo para o corpo da página */
 body {
     font-size: 100%;
-    background: linear-gradient(68.15deg, #2F2322 16.62%, #784cf0 85.61%);
-    cursor: pointer;
+    /* Fallback de cor caso a imagem não carregue */
+    background-color: #2F2322; 
+    background-image: url('../img/fundo.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Impede o fundo de rolar com a página */
 }
 
 .cabeçalho {
@@ -21,34 +25,36 @@ body {
     align-items: center;
     justify-content: space-around;
     padding: 24px;
+    /* Adiciona um fundo sutil para garantir a legibilidade em qualquer parte da imagem */
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
 }
 
 .opcao-cabeçalho{
     display: flex;
     gap: 32px;
-    
 }
 
 .opcao-cabeçalho-item{
-    color: #FFF2EF;
+    color: #2F2322; /* COR ESCURA PARA CONTRASTE */
     font-weight: 400;
     font-size: 18px;
+    text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.7); /* Sombra para destacar */
 }
 
 .corpo{
-    border-top:0.4px solid #FFF2EF;
+    border-top: 0.4px solid #cccccc; /* BORDA CINZA CLARO */
     padding: 32px;
 }
 
 .text-corpo{
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column; /* Ajustado para melhor alinhamento */
+    align-items: center;   /* Centraliza o conteúdo */
     justify-content: space-around;
-    color: #FFF2EF;
+    text-align: center;    /* Garante que o texto fique centralizado */
+    color: #2F2322; /* COR ESCURA PARA CONTRASTE */
 }
-
-/* Adicione estas classes ao seu CSS */
 
 .botao{
     display: flex;
@@ -60,7 +66,7 @@ body {
 
 .botao-corpo {
     display: flex;
-    justify-content: space-around;
+    justify-content: center; /* Ajustado para centralizar o texto */
     align-items: center;
     padding: 15px 30px; 
     background-color: #ECD6C4;
@@ -70,19 +76,19 @@ body {
     border: none;
     box-shadow: 4px 5px 4px rgba(0,0,0,0.25);
     border-radius: 20px;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-weight: 300;
-    font-size: 24px;
+    font-family: "Oswald", sans-serif; /* Consistência com o resto da página */
+    font-weight: 400;
+    font-size: 20px; /* Ajuste de fonte */
     color: #2F2322;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease; 
-    margin-top: 20px;
 }
 
 .botao-corpo:hover {
     transform: translateY(-2px); 
     box-shadow: 6px 7px 6px rgba(0,0,0,0.25);
+    background-color: #e0c8b4; /* Leve escurecida no hover */
 }
 
 .corpo1{
@@ -96,31 +102,30 @@ body {
 }
 
 .text-corpo1{
-    border-top: 0.4px solid #FFF2EF;
+    border-top: 0.4px solid #cccccc; /* BORDA CINZA CLARO */
     padding-top: 48px;
     font-weight: 400;
     font-size: 24px;
-    color:#FFF2EF;
+    color: #2F2322; /* COR ESCURA PARA CONTRASTE */
     margin-bottom: 16px;
 }
 
 .text-corpo2{
     margin-bottom: 10px;
-    color:#ECD6C4;
+    color: #2F2322; /* <<<<<<< ALTERAÇÃO PRINCIPAL AQUI */
     font-size: 18px;
     font-weight: 300;
 }
 
 .fim{
     padding: 32px;
-    border-top: 0.4px solid #FFF2EF;
+    border-top: 0.4px solid #cccccc; /* BORDA CINZA CLARO */
     margin-top: 48px;
 }
 
 .fim-botao{
     display: block;
     margin: 0 auto;
-    justify-content: space-around;
     padding: 15px 30px; 
     background-color: #ECD6C4;
     width: auto; 
@@ -129,13 +134,61 @@ body {
     border: none;
     box-shadow: 4px 5px 4px rgba(0,0,0,0.25);
     border-radius: 20px;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-weight: 300;
-    font-size: 24px;
+    font-family: "Oswald", sans-serif;
+    font-weight: 400;
+    font-size: 20px;
     color: #2F2322;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease; 
-    margin-top: 20px;
     margin-bottom: 20px;
+}
+
+/* Estilos para as listas dinâmicas geradas pelo JS */
+.animated-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1a73e8;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+#lista-container {
+    padding: 0 20px; /* Adiciona espaçamento nas laterais */
+}
+
+.lista-itens {
+    margin: 40px auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px; /* Define uma largura máxima */
+    background-color: rgba(255, 255, 255, 0.85); /* Fundo branco semitransparente */
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px);
+}
+
+.item {
+    background: #ffffff;
+    padding: 15px; /* Mais espaçamento interno */
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 18px;
+    color: #2F2322;
+    font-weight: 400;
+    transition: transform 0.2s ease;
+}
+
+.item:hover {
+    transform: scale(1.02); /* Efeito de zoom sutil no hover */
 }
