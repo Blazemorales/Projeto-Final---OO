@@ -235,3 +235,89 @@ class DataRecord:
 
     def getAllStores(self):
         return [vars(store) for store in self.__stores]
+
+
+    def __write_products(self):
+        """Salva a lista de produtos atual no arquivo JSON."""
+        try:
+            with open("app/controllers/db/products.json", "w", encoding="utf-8") as f:
+                # Converte a lista de objetos Product em uma lista de dicionários
+                list_of_dicts = [vars(prod) for prod in self.__products]
+                json.dump(list_of_dicts, f, indent=4, ensure_ascii=False)
+        except Exception as e:
+            print(f"Erro ao salvar produtos: {e}")
+
+    def __write_stores(self):
+        """Salva a lista de lojas atual no arquivo JSON."""
+        try:
+            with open("app/controllers/db/stores.json", "w", encoding="utf-8") as f:
+                list_of_dicts = [vars(store) for store in self.__stores]
+                json.dump(list_of_dicts, f, indent=4, ensure_ascii=False)
+        except Exception as e:
+            print(f"Erro ao salvar lojas: {e}")
+            
+# Em app/controllers/datarecord.py, dentro da classe DataRecord
+
+    def add_store(self, nome, endereco, telefone):
+        """Adiciona uma nova loja e salva no JSON."""
+        new_id = str(uuid.uuid4()) # Gera um ID único
+        new_store = Store(id=new_id, nome=nome, endereco=endereco, telefone=telefone)
+        self.__stores.append(new_store)
+        self.__write_stores()
+        return new_store
+
+    def add_product(self, nome, descricao, preco, estoque, loja_id):
+        """Adiciona um novo produto e salva no JSON."""
+        new_id = str(uuid.uuid4())
+        # Tenta converter preco para float e estoque para int
+        try:
+            preco = float(preco)
+            estoque = int(estoque)
+        except (ValueError, TypeError):
+            print("Erro: Preço ou estoque inválido.")
+            return None
+        
+        new_prod = Product(id=new_id, nome=nome, descricao=descricao, preco=preco, estoque=estoque)
+        # O modelo de produto que você mandou não tem loja_id, mas é uma boa prática ter.
+        # Se quiser associar, adicione `loja_id` ao __init__ da classe Product.
+        # Por agora, não vamos associar.
+        self.__products.append(new_prod)
+        self.__write_products()
+        return new_prod
+
+    def update_product_stock(self, product_id, new_stock):
+        """Atualiza o estoque de um produto específico."""
+        for product in self.__products:
+            if product.id == product_id:
+                try:
+                    product.estoque = int(new_stock)
+                    self.__write_products()
+                    return product
+                except (ValueError, TypeError):
+                    return None
+        return None
+
+    def delete_product(self, product_id):
+        """Exclui um produto da lista."""
+        product_found = any(p.id == product_id for p in self.__products)
+        if product_found:
+            self.__products = [p for p in self.__products if p.id != product_id]
+            self.__write_products()
+            return True
+        return False
+    
+# Em app/controllers/datarecord.py, dentro da classe DataRecord
+
+    def delete_store(self, store_id):
+        """Exclui uma loja da lista com base no seu ID."""
+        # Verifica se a loja a ser excluída realmente existe
+        store_found = any(s.id == store_id for s in self.__stores)
+        if store_found:
+            # Cria uma nova lista contendo todas as lojas, exceto a que tem o ID correspondente
+            self.__stores = [s for s in self.__stores if s.id != store_id]
+            # Salva a nova lista (sem a loja excluída) no arquivo JSON
+            self.__write_stores()
+            print(f"Loja com ID {store_id} foi excluída.")
+            return True
+        print(f"Tentativa de excluir loja com ID {store_id}, mas não foi encontrada.")
+        return False

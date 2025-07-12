@@ -39,7 +39,7 @@ class Application:
         
         @self.app.route('/', method='GET')
         def pagina_getter():
-            return self.render('pagina')
+            return self.render('portal')
 
         @self.app.route('/chat', method='GET')
         def chat_getter():
@@ -156,6 +156,88 @@ class Application:
                 return "<h1>Ação Inválida</h1><p>Você não pode excluir a si mesmo.</p>"
             self.__users.removeUser(username_to_delete)
             redirect('/admin/users')
+
+
+
+        @self.app.route('/add_store', method='POST')
+        def add_store_action():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+
+            nome = request.forms.get('nome')
+            endereco = request.forms.get('endereco')
+            telefone = request.forms.get('telefone')
+            self.__produtos.add_store(nome, endereco, telefone)
+            redirect('/stock')
+
+        @self.app.route('/add_product', method='POST')
+        def add_product_action():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+
+            nome = request.forms.get('nome')
+            descricao = request.forms.get('descricao')
+            preco = request.forms.get('preco')
+            estoque = request.forms.get('estoque')
+            self.__produtos.add_product(nome, descricao, preco, estoque, loja_id=None) # loja_id não usado por enquanto
+            redirect('/stock')
+
+        @self.app.route('/update_stock/<product_id>', method='POST')
+        def update_stock_action(product_id):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+            
+            new_stock = request.forms.get('estoque')
+            self.__produtos.update_product_stock(product_id, new_stock)
+            redirect('/stock')
+
+        @self.app.route('/delete_product/<product_id>', method='POST')
+        def delete_product_action(product_id):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+            
+            self.__produtos.delete_product(product_id)
+            redirect('/stock')
+            
+# Em application.py, dentro de setup_routes(self)
+
+        @self.app.route('/stock', method='GET')
+        def stock_list_page():
+            current_user = self.getCurrentUserBySessionId()
+            
+            # Define o tipo de usuário. Se não estiver logado, é 'comum'.
+            user_type = 'comum'
+            if current_user and hasattr(current_user, 'tipo'):
+                user_type = current_user.tipo
+
+            # Busca os dados de produtos e lojas
+            all_products = self.__produtos.getAllProducts()
+            all_stores = self.__produtos.getAllStores()
+
+            # Renderiza a nova página unificada, passando o tipo de usuário
+            return template('app/views/html/stock_list.html',
+                            user_type=user_type, 
+                            products=all_products, 
+                            stores=all_stores)
+            
+# Em application.py, dentro de setup_routes(self)
+
+        @self.app.route('/delete_store/<store_id>', method='POST')
+        def delete_store_action(store_id):
+            current_user = self.getCurrentUserBySessionId()
+            # Proteção: Apenas administradores podem executar esta ação
+            if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
+                return "<h1>Acesso Negado</h1>"
+            
+            # Chama o método que acabamos de criar no datarecord
+            self.__produtos.delete_store(store_id)
+            
+            # Redireciona o admin de volta para a página de estoque
+            redirect('/stock')
 
     # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
