@@ -9,9 +9,6 @@
 <body>
     <header class="cabeçalho">
         <nav class="opcao-cabeçalho">
-            
-            <button class="opcao-cabeçalho-item" id="btn-lojas">Lojas</button>
-            <button class="opcao-cabeçalho-item" id="btn-produtos">Produtos</button>
 
             % if user_type_raw == 'adm':
                 <a href="/admin/users" class="opcao-cabeçalho-item" style="color: #ffb300; font-weight: bold;">Gerenciar Usuários</a>
@@ -27,9 +24,9 @@
                 <h2 class="text-corpo">
                     Este é o Project Stok. Seja bem-vindo! Aproveite para conhecer as lojas e produtos cadastrados.
                 </h2>
+
                 <div class="botao">
-                    <button class="botao-corpo" id="btn-lojas-mobile">Ver lojas</button>
-                    <button class="botao-corpo" id="btn-produtos-mobile">Ver Produtos</button>
+                    <a href="/stock" class="botao-corpo">Ver Lojas e Produtos</a>
                 </div>
             </div>
         </section>
@@ -46,7 +43,6 @@
             </div>
         </section>
 
-        <div id="lista-container"></div>
     </main>
 
     <footer class="fim">
@@ -55,13 +51,6 @@
         </form>
     </footer>
 
-    <script>
-        /* global lojas, itens, userType */
-        const userType = {{!user_type_json}}; /* <<< CORRIGIDO AQUI */
-        const itens = {{!itens}};
-        const lojas = {{!lojas}};
-    </script>
-    <script src="/static/js/main.js" defer></script>
 
 </body>
 </html>
