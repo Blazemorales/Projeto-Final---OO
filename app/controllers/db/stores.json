@@ -1,14 +1,8 @@
 [
     {
-        "id": 1,
+        "id": "1",
         "nome": "Loja Central",
         "endereco": "Rua Principal, 123",
         "telefone": "(11) 99999-9999"
-    },
-    {
-        "id": 2,
-        "nome": "Loja Norte",
-        "endereco": "Av. Norte, 456",
-        "telefone": "(11) 98888-8888"
     }
 ]

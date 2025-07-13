@@ -308,16 +308,39 @@ class DataRecord:
     
 # Em app/controllers/datarecord.py, dentro da classe DataRecord
 
+# Substitua sua função delete_store por esta versão com prints
+
     def delete_store(self, store_id):
         """Exclui uma loja da lista com base no seu ID."""
-        # Verifica se a loja a ser excluída realmente existe
-        store_found = any(s.id == store_id for s in self.__stores)
-        if store_found:
-            # Cria uma nova lista contendo todas as lojas, exceto a que tem o ID correspondente
-            self.__stores = [s for s in self.__stores if s.id != store_id]
-            # Salva a nova lista (sem a loja excluída) no arquivo JSON
-            self.__write_stores()
-            print(f"Loja com ID {store_id} foi excluída.")
+        
+        # --- DEBUG Prints ---
+        print("-" * 40)
+        print(f"Tentando excluir ID recebido: '{store_id}' (Tipo: {type(store_id)})")
+        
+        # Vamos imprimir todos os IDs que temos na memória para comparar
+        ids_na_memoria = [s.id for s in self.__stores]
+        print(f"IDs de lojas atualmente na memória: {ids_na_memoria}")
+        # --------------------
+
+        store_to_delete = None
+        for store in self.__stores:
+            # --- DEBUG Print dentro do loop ---
+            print(f"Comparando '{store_id}' com '{store.id}' (Tipo: {type(store.id)})")
+            # --------------------------------
+
+            # Comparando os valores como strings para garantir a correspondência
+            if str(store.id) == str(store_id):
+                store_to_delete = store
+                print(f"LOJA ENCONTRADA: {store.nome}")
+                break # Encontrou a loja, pode parar o loop
+
+        if store_to_delete:
+            self.__stores.remove(store_to_delete)
+            self.__write_stores() # Tenta salvar no arquivo
+            print(f"Loja com ID {store_id} foi REMOVIDA da lista em memória e salva.")
+            print("-" * 40)
             return True
-        print(f"Tentativa de excluir loja com ID {store_id}, mas não foi encontrada.")
+        
+        print(f"Tentativa de excluir loja com ID {store_id}, mas NÃO FOI ENCONTRADA na lista.")
+        print("-" * 40)
         return False

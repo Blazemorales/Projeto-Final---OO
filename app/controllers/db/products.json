@@ -1,23 +1,16 @@
 [
     {
-        "id": 1,
+        "id": "1",
         "nome": "Caneta Azul",
         "descricao": "Caneta esferográfica azul, ponta fina",
         "preco": 2.5,
         "estoque": 100
     },
     {
-        "id": 2,
+        "id": "2",
         "nome": "Caderno 100 folhas",
         "descricao": "Caderno espiral com 100 folhas pautadas",
         "preco": 12.9,
         "estoque": 50
-    },
-    {
-        "id": "5b17de30-bc1d-4439-b169-8fbf3e91acdc",
-        "nome": "Kicks",
-        "descricao": "Carro",
-        "preco": 199000.0,
-        "estoque": 7
     }
 ]
