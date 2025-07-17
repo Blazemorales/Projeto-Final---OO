@@ -196,11 +196,34 @@ class UserRecord():
                     return user
         return None
 
-
-
     def logout(self, session_id):
         if session_id in self.__authenticated_users:
             del self.__authenticated_users[session_id] # Remove o usuário logado
+
+    def logout_by_username(self, username_to_logout):
+        """Encontra e remove a sessão de um usuário autenticado pelo seu nome de usuário."""
+        session_id_to_delete = None
+        # Itera sobre uma cópia dos itens para poder modificar o dicionário original
+        for session_id, user_object in list(self.__authenticated_users.items()):
+            if user_object.username == username_to_logout:
+                session_id_to_delete = session_id
+                break # Encontrou o usuário, pode parar
+        
+        if session_id_to_delete:
+            del self.__authenticated_users[session_id_to_delete]
+            print(f"Sessão do usuário '{username_to_logout}' foi encerrada forçadamente.")
+            return True
+        
+        print(f"Tentativa de logout forçado para '{username_to_logout}', mas ele não estava logado.")
+        return False
+
+    def user_exists(self, username):
+        """Verifica se um nome de usuário ainda existe nos registros principais."""
+        for account_type in ['user_accounts', 'super_accounts']:
+            for user in self.__allusers[account_type]:
+                if user.username == username:
+                    return True # Encontrou o usuário, ele existe.
+        return False # Não encontrou em nenhuma lista, não existe mais.
 
 class DataRecord:
     """Gerencia produtos e lojas a partir de arquivos JSON"""

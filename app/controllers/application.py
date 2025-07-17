@@ -2,6 +2,20 @@ from app.controllers.datarecord import UserRecord, MessageRecord, DataRecord
 from bottle import template, redirect, request, response, Bottle, static_file
 import socketio
 import json
+def formatar_telefone(numero):
+    """Formata um número de telefone (10 ou 11 dígitos) para (XX) XXXX-XXXX ou (XX) XXXXX-XXXX."""
+    # Remove qualquer caractere que não seja um dígito
+    numero_limpo = "".join(filter(str.isdigit, str(numero)))
+    
+    if len(numero_limpo) == 11:
+        # Formato para celular: (XX) XXXXX-XXXX
+        return f"({numero_limpo[0:2]}) {numero_limpo[2:7]}-{numero_limpo[7:]}"
+    elif len(numero_limpo) == 10:
+        # Formato para fixo: (XX) XXXX-XXXX
+        return f"({numero_limpo[0:2]}) {numero_limpo[2:6]}-{numero_limpo[6:]}"
+    else:
+        # Se não for 10 ou 11, retorna o número original sem formatação
+        return numero
 
 class Application:
 
@@ -114,7 +128,8 @@ class Application:
             if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
                 return "<h1>Acesso Negado</h1><p>Você não tem permissão para acessar esta página.</p>"
             all_users = self.__users.getUserAccounts()
-            return template('app/views/html/admin_users.html', users=all_users, current_admin=current_user)
+            self._broadcast_user_list_update()
+            return template('app/views/html/admin_users.html', users=all_users, current_admin=current_user, json=json)
 
         @self.app.route('/admin/users/create', method='GET')
         def create_user_form():
@@ -122,6 +137,7 @@ class Application:
             if not current_user or getattr(current_user, 'tipo', 'comum') != 'adm':
                 return "<h1>Acesso Negado</h1>"
             pending_users = self.__users.get_pending_requests()
+            self._broadcast_user_list_update()
             return template('app/views/html/create_user.html', pending_users=pending_users)
 
         @self.app.route('/admin/users/create', method='POST')
@@ -133,6 +149,7 @@ class Application:
             password = request.forms.get('password')
             user_type = request.forms.get('user_type')
             self.__users.book(username, password, user_type) 
+            self._broadcast_user_list_update()
             redirect('/admin/users')
 
         @self.app.route('/admin/users/approve', method='POST')
@@ -145,7 +162,9 @@ class Application:
             user_type = request.forms.get('user_type')
             self.__users.book(username, password, user_type)
             self.__users.remove_pending_request(username)
+            self._broadcast_user_list_update()
             redirect('/admin/users/create')
+
 
         @self.app.route('/admin/users/delete/<username_to_delete>', method='POST')
         def delete_user_action(username_to_delete):
@@ -154,9 +173,21 @@ class Application:
                 return "<h1>Acesso Negado</h1>"
             if current_user.username == username_to_delete:
                 return "<h1>Ação Inválida</h1><p>Você não pode excluir a si mesmo.</p>"
-            self.__users.removeUser(username_to_delete)
-            redirect('/admin/users')
 
+            # PASSO 1: Força o logout da sessão ativa do usuário (se houver)
+            # ESTA É A LINHA CRÍTICA QUE ESTAVA FALTANDO
+            self.__users.logout_by_username(username_to_delete)
+
+            # PASSO 2: Remove o usuário do arquivo JSON (isso você já fazia)
+            self.__users.removeUser(username_to_delete)
+
+            # PASSO 3: Dispara o evento Websocket para atualizar as telas dos outros admins
+            self._broadcast_user_list_update()
+            
+            # PASSO 4: Atualiza a lista de usuários online (para o chat)
+            self.update_users_list()
+
+            redirect('/admin/users')
 
 
         @self.app.route('/add_store', method='POST')
@@ -169,6 +200,7 @@ class Application:
             endereco = request.forms.get('endereco')
             telefone = request.forms.get('telefone')
             self.__produtos.add_store(nome, endereco, telefone)
+            self._broadcast_stock_update()
             redirect('/stock')
 
         @self.app.route('/add_product', method='POST')
@@ -182,6 +214,7 @@ class Application:
             preco = request.forms.get('preco')
             estoque = request.forms.get('estoque')
             self.__produtos.add_product(nome, descricao, preco, estoque, loja_id=None) # loja_id não usado por enquanto
+            self._broadcast_stock_update()
             redirect('/stock')
 
         @self.app.route('/update_stock/<product_id>', method='POST')
@@ -192,6 +225,7 @@ class Application:
             
             new_stock = request.forms.get('estoque')
             self.__produtos.update_product_stock(product_id, new_stock)
+            self._broadcast_stock_update()
             redirect('/stock')
 
         @self.app.route('/delete_product/<product_id>', method='POST')
@@ -201,6 +235,8 @@ class Application:
                 return "<h1>Acesso Negado</h1>"
             
             self.__produtos.delete_product(product_id)
+            
+            self._broadcast_stock_update()
             redirect('/stock')
             
 # Em application.py, dentro de setup_routes(self)
@@ -217,12 +253,13 @@ class Application:
             # Busca os dados de produtos e lojas
             all_products = self.__produtos.getAllProducts()
             all_stores = self.__produtos.getAllStores()
-
+            self._broadcast_stock_update()
             # Renderiza a nova página unificada, passando o tipo de usuário
             return template('app/views/html/stock_list.html',
                             user_type=user_type, 
                             products=all_products, 
-                            stores=all_stores)
+                            stores=all_stores,
+                            format_phone=formatar_telefone)
             
 # Em application.py, dentro de setup_routes(self)
 
@@ -235,6 +272,8 @@ class Application:
             
             # Chama o método que acabamos de criar no datarecord
             self.__produtos.delete_store(store_id)
+            
+            self._broadcast_stock_update()
             
             # Redireciona o admin de volta para a página de estoque
             redirect('/stock')
@@ -409,3 +448,22 @@ class Application:
         users = self.__users.getUserAccounts()
         users_list = [{'username': user.username} for user in users]
         self.sio.emit('update_account_event', {'accounts': users_list})
+
+
+    def _broadcast_stock_update(self):
+        """Busca os dados mais recentes de estoque e os envia para todos os clientes via Websocket."""
+        print("Disparando atualização de estoque em tempo real para todos os clientes...")
+        all_products = self.__produtos.getAllProducts()
+        all_stores = self.__produtos.getAllStores()
+        # O nome do nosso evento será 'stock_updated'
+        self.sio.emit('stock_updated', {'products': all_products, 'stores': all_stores})
+
+        # Em application.py, dentro da classe Application
+
+    def _broadcast_user_list_update(self):
+        """Busca a lista completa de contas de usuário e a envia para todos via Websocket."""
+        print("Disparando atualização da lista de usuários em tempo real...")
+        all_users = self.__users.getUserAccounts()
+        # Converte a lista de objetos para uma lista de dicionários para o JSON
+        users_as_dicts = [vars(user) for user in all_users]
+        self.sio.emit('user_list_updated', {'users': users_as_dicts})
