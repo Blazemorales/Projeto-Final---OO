@@ -20,6 +20,17 @@
         .botao-excluir { background-color: #e74c3c; }
         .lista-simples { list-style-type: none; padding: 0; }
         .lista-simples li { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; }
+        .celula-descricao {
+            /* Define uma largura máxima para a coluna. Ajuste conforme necessário. */
+            max-width: 1000px; 
+
+            /* Garante que o texto quebre linha normalmente */
+            white-space: normal;
+
+            /* Força a quebra de palavras muito longas que não caberiam na célula */
+            overflow-wrap: break-word;
+            word-wrap: break-word; /* Para navegadores mais antigos */
+        }
     </style>
 </head>
 <body>
@@ -31,7 +42,7 @@
                 <form action="/add_store" method="post" class="form-gerenciamento">
                     <input type="text" name="nome" placeholder="Nome da Loja" required>
                     <input type="text" name="endereco" placeholder="Endereço" required>
-                    <input type="text" name="telefone" placeholder="Telefone" required>
+                    <input type="text" name="telefone" id="telefone-input" placeholder="Telefone" required>
                     <button type="submit" class="botao-corpo">Adicionar Loja</button>
                 </form>
             </div>
@@ -52,13 +63,9 @@
             % if not stores:
                 <p>Nenhuma loja cadastrada no momento.</p>
             % else:
-                <ul class="lista-simples">
+                <ul class="lista-simples" id="store-list">
                 % for store in stores:
-                    <li style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>
-                            <strong>{{store['nome']}}</strong> ({{store['endereco']}})
-                        </span>
-                        
+                    <li><strong>{{store['nome']}}</strong> ({{store['endereco']}}) | Tel: {{format_phone(store['telefone'])}}</li>                      
                         % if user_type == 'adm':
                             <form action="/delete_store/{{store['id']}}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta loja?');">
                                 <button type="submit" class="botao-acao botao-excluir">Excluir</button>
@@ -84,11 +91,11 @@
                         % end
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="product-table-body">
                     % for product in products:
                     <tr>
                         <td>{{product['nome']}}</td>
-                        <td>{{product['descricao']}}</td>
+                        <td class="celula-descricao">{{product['descricao']}}</td>
                         <td>R$ {{'%.2f' % product['preco']}}</td>
                         % if user_type == 'adm':
                             <td>
@@ -116,5 +123,133 @@
 
         <a href="/main" class="opcao-cabeçalho-item" style="display: block; text-align: center; margin-top: 20px; font-size: 20px;">← Voltar para a Página Principal</a>
     </div>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+    // Inicia a conexão com o servidor Websocket
+    const socket = io();
+
+    // Passa o tipo de usuário do template do Bottle para o JavaScript
+    const userType = "{{ user_type }}";
+
+    socket.on('connect', () => {
+        console.log('Conectado ao servidor para atualizações em tempo real!');
+    });
+
+    // Esta é a função principal: ela "ouve" o evento 'stock_updated'
+    socket.on('stock_updated', (data) => {
+        console.log('Atualização de estoque recebida!', data);
+        
+        // Chama a função para redesenhar as listas com os novos dados
+        updatePageWithNewData(data.products, data.stores);
+    });
+
+    /**
+     * Esta função apaga as listas atuais e as recria com os dados novos recebidos do servidor.
+     * @param {Array} products - A nova lista de produtos.
+     * @param {Array} stores - A nova lista de lojas.
+     */
+    function updatePageWithNewData(products, stores) {
+        const storeList = document.getElementById('store-list');
+        const productTableBody = document.getElementById('product-table-body');
+
+        // Limpa o conteúdo atual
+        storeList.innerHTML = '';
+        productTableBody.innerHTML = '';
+
+        // Recria a lista de lojas
+        if (!stores || stores.length === 0) {
+            storeList.innerHTML = '<p>Nenhuma loja cadastrada no momento.</p>';
+        } else {
+            stores.forEach(store => {
+                const li = document.createElement('li');
+                li.style.display = 'flex';
+                li.style.justifyContent = 'space-between';
+                li.style.alignItems = 'center';
+                let storeHtml = `<span><strong>${store.nome}</strong> (${store.endereco}) | Tel: ${formatarTelefone(store.telefone)}</span>`;
+                if (userType === 'adm') {
+                    storeHtml += `
+                        <form action="/delete_store/${store.id}" method="post" onsubmit="return confirm('Tem certeza?');">
+                            <button type="submit" class="botao-acao botao-excluir">Excluir</button>
+                        </form>
+                    `;
+                }
+                li.innerHTML = storeHtml;
+                storeList.appendChild(li);
+            });
+        }
+
+        // Recria a tabela de produtos
+        products.forEach(product => {
+            const tr = document.createElement('tr');
+            
+            let productHtml = `
+                <td>${product.nome}</td>
+                <td>${product.descricao}</td>
+                <td>R$ ${product.preco.toFixed(2)}</td>
+            `;
+
+            // Lógica para a coluna de estoque (campo de edição para admin, texto para outros)
+            if (userType === 'adm') {
+                productHtml += `
+                    <td>
+                        <form action="/update_stock/${product.id}" method="post" style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" name="estoque" value="${product.estoque}" class="stock-input">
+                            <button type="submit" class="botao-acao botao-salvar">Salvar</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="/delete_product/${product.id}" method="post" onsubmit="return confirm('Tem certeza?');">
+                            <button type="submit" class="botao-acao botao-excluir">Excluir</button>
+                        </form>
+                    </td>
+                `;
+            } else {
+                productHtml += `<td>${product.estoque}</td>`;
+            }
+
+            tr.innerHTML = productHtml;
+            productTableBody.appendChild(tr);
+        });
+    }
+    // Em stock_list.html, dentro de <script>
+
+    function formatarTelefone(numero) {
+        const numeroLimpo = String(numero).replace(/\D/g, ''); // Remove tudo que não é dígito
+
+        if (numeroLimpo.length === 11) {
+            // Formato para celular: (XX) XXXXX-XXXX
+            return `(${numeroLimpo.substring(0, 2)}) ${numeroLimpo.substring(2, 7)}-${numeroLimpo.substring(7)}`;
+        } else if (numeroLimpo.length === 10) {
+            // Formato para fixo: (XX) XXXX-XXXX
+            return `(${numeroLimpo.substring(0, 2)}) ${numeroLimpo.substring(2, 6)}-${numeroLimpo.substring(6)}`;
+        } else {
+            // Retorna o número original se não tiver 10 ou 11 dígitos
+            return numero;
+        }
+    }
+
+    const telefoneInput = document.getElementById('telefone-input');
+
+    if (telefoneInput) {
+        telefoneInput.addEventListener('input', (e) => {
+            let valor = e.target.value.replace(/\D/g, '');
+            valor = valor.substring(0, 11); // Limita a 11 dígitos
+
+            if (valor.length > 10) {
+                // Formato celular
+                valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+            } else if (valor.length > 6) {
+                // Formato fixo parte 2
+                valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+            } else if (valor.length > 2) {
+                // Formato fixo parte 1
+                valor = valor.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
+            } else if (valor.length > 0) {
+                valor = valor.replace(/^(\d*)/, '($1');
+            }
+            e.target.value = valor;
+        });
+    }
+</script>
 </body>
 </html>
